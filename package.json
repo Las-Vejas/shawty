@@ -25,6 +25,7 @@
 		"vite": "^7.2.6"
 	},
 	"dependencies": {
-		"@supabase/supabase-js": "^2.89.0"
+		"@supabase/supabase-js": "^2.89.0",
+		"@vercel/analytics": "^1.6.1"
 	}
 }
