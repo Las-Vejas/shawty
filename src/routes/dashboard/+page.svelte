@@ -9,6 +9,10 @@
     // Track which QR code is being shown
     let showQrId = $state<string | null>(null);
     
+    // Track which link is being edited
+    let editingId = $state<string | null>(null);
+    let editUrl = $state<string>('');
+    
     function toggleMenu(linkId: string) {
         openMenuId = openMenuId === linkId ? null : linkId;
     }
@@ -20,6 +24,17 @@
     
     function closeQr() {
         showQrId = null;
+    }
+    
+    function startEdit(linkId: string, currentUrl: string) {
+        editingId = linkId;
+        editUrl = currentUrl;
+        openMenuId = null;
+    }
+    
+    function cancelEdit() {
+        editingId = null;
+        editUrl = '';
     }
 </script>
 
@@ -61,6 +76,12 @@
             </div>
         {/if}
 
+        {#if form?.updated}
+            <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 text-emerald-400">
+                ✅ Link updated successfully!
+            </div>
+        {/if}
+
         <!-- Links Table -->
         <div class="bg-zinc-900 rounded-2xl shadow-lg p-6">
             <h2 class="text-xl font-semibold mb-4">Your links</h2>
@@ -79,9 +100,30 @@
                                         </span>
                                     {/if}
                                 </div>
-                                <a href={link.long_url} target="_blank" rel="noopener noreferrer" class="text-xs text-zinc-400 truncate hover:text-zinc-300">
-                                    {link.long_url}
-                                </a>
+                                
+                                {#if editingId === link.id}
+                                    <!-- Edit Form -->
+                                    <form method="POST" action="?/update" class="flex gap-2 mt-2">
+                                        <input type="hidden" name="linkId" value={link.id} />
+                                        <input
+                                            name="newUrl"
+                                            bind:value={editUrl}
+                                            placeholder="Enter new destination URL"
+                                            required
+                                            class="flex-1 rounded-lg bg-zinc-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                        />
+                                        <button type="submit" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-sm font-medium">
+                                            Save
+                                        </button>
+                                        <button type="button" onclick={cancelEdit} class="px-4 py-2 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-sm">
+                                            Cancel
+                                        </button>
+                                    </form>
+                                {:else}
+                                    <a href={link.long_url} target="_blank" rel="noopener noreferrer" class="text-xs text-zinc-400 truncate hover:text-zinc-300">
+                                        {link.long_url}
+                                    </a>
+                                {/if}
                             </div>
                             <div class="flex items-center gap-4 text-sm ml-4">
                                 <span class="text-zinc-400 whitespace-nowrap">{link.clicks} clicks</span>
@@ -110,6 +152,13 @@
                                                     <rect x="3" y="14" width="7" height="7"></rect>
                                                 </svg>
                                                 Show QR Code
+                                            </button>
+                                            
+                                            <button onclick={() => startEdit(link.id, link.long_url)} class="w-full px-4 py-2 text-left text-sm hover:bg-zinc-700 flex items-center gap-3">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                                </svg>
+                                                Edit Destination
                                             </button>
                                             
                                             <div class="border-t border-zinc-700 my-1"></div>

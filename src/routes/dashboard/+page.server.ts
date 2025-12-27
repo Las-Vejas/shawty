@@ -56,6 +56,47 @@ export const actions = {
         return { success: true, shortCode };
     },
 
+    update: async ({ request, locals }) => {
+        if (!locals.user) throw redirect(302, '/login');
+
+        const formData = await request.formData();
+        const linkId = formData.get('linkId')?.toString();
+        let newUrl = formData.get('newUrl')?.toString();
+
+        console.log('Update request:', { linkId, newUrl }); // Debug log
+
+        if (!linkId) {
+            return fail(400, { error: 'Link ID is required' });
+        }
+
+        if (!newUrl || newUrl.trim() === '') {
+            return fail(400, { error: 'URL cannot be empty' });
+        }
+
+        if (!newUrl.match(/^https?:\/\//i)) {
+            newUrl = 'https://' + newUrl;
+        }
+
+        try {
+            new URL(newUrl);
+        } catch {
+            return fail(400, { error: 'Invalid URL format' });
+        }
+
+        const { error } = await supabase
+            .from('links')
+            .update({ long_url: newUrl })
+            .eq('id', linkId)
+            .eq('user_id', locals.user.id);
+
+        if (error) {
+            console.error('Database error:', error);
+            return fail(500, { error: 'Failed to update link' });
+        }
+
+        return { updated: true };
+    },
+
     toggleLeaderboard: async ({ request, locals }) => {
         if (!locals.user) throw redirect(302, '/login');
 
@@ -67,7 +108,6 @@ export const actions = {
             return fail(400, { error: 'Link ID is required' });
         }
 
-        // Toggle the leaderboard status
         const { error } = await supabase
             .from('links')
             .update({ on_leaderboard: !currentStatus })
