@@ -15,7 +15,7 @@
                     Short links,
                 </span>
                 <br />
-                <span class="bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                <span class="bg-linear-to-r from-amber-400 to-sky-400 bg-clip-text text-transparent">
                     infinite possibilities
                 </span>
             </h1>
@@ -32,7 +32,7 @@
                     </a>
                 {:else}
                     <a href="/login" class="px-8 py-4 rounded-xl bg-white text-zinc-900 font-semibold hover:bg-zinc-200 text-lg shadow-lg hover:shadow-xl transition-all">
-                        Get Started Free
+                        Get Started For Free
                     </a>
                 {/if}
                 <a href="#features" class="px-8 py-4 rounded-xl bg-zinc-800 hover:bg-zinc-700 font-medium text-lg transition-all">
@@ -176,10 +176,95 @@
         </div>
     </div>
 
+<div id="analytics" class="px-6 py-20">
+        <div class="mx-auto max-w-5xl">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">Analytics you care about</h2>
+                <p class="text-xl text-zinc-400">Easy to read data included!</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- User Location -->
+                <div class="bg-zinc-900 rounded-2xl p-8 border border-zinc-800 hover:border-zinc-700 transition-colors">
+                    <div class="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-amber-400">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="2" y1="12" x2="22" y2="12"></line>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10A15.3 15.3 0 0 1 12 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">User Location</h3>
+                    <p class="text-zinc-400">See where your users are coming from with (not so) detailed location data.</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="bg-zinc-900 rounded-2xl p-8 border border-zinc-800 hover:border-zinc-700 transition-colors">
+                    <div class="w-12 h-12 rounded-xl bg-pink-500/10 flex items-center justify-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-pink-400">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Devices</h3>
+                    <p class="text-zinc-400">See what devices your users are using to access your sites.</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="bg-zinc-900 rounded-2xl p-8 border border-zinc-800 hover:border-zinc-700 transition-colors">
+                    <div class="w-12 h-12 rounded-xl bg-lime-500/10 flex items-center justify-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-lime-400">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Operating systems</h3>
+                    <p class="text-zinc-400">See what operating system is most popular among your users.</p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="bg-zinc-900 rounded-2xl p-8 border border-zinc-800 hover:border-zinc-700 transition-colors">
+                    <div class="w-12 h-12 rounded-xl bg-rose-500/10 flex items-center justify-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-rose-400">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Secure</h3>
+                    <p class="text-zinc-400">Nobody can see your link data except you.</p>
+                </div>
+
+                <!-- Feature 5 -->
+                <div class="bg-zinc-900 rounded-2xl p-8 border border-zinc-800 hover:border-zinc-700 transition-colors">
+                    <div class="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-400">
+                            <line x1="6" y1="20" x2="6" y2="12"></line>
+                            <line x1="12" y1="20" x2="12" y2="8"></line>
+                            <line x1="18" y1="20" x2="18" y2="4"></line>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Analytics for each link</h3>
+                    <p class="text-zinc-400">See analytics for every link you create with great detail.</p>
+                </div>
+
+                <!-- Feature 6 -->
+                <div class="bg-zinc-900 rounded-2xl p-8 border border-zinc-800 hover:border-zinc-700 transition-colors">
+                    <div class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-purple-400">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Privacy First</h3>
+                    <p class="text-zinc-400">Your data stays yours. No tracking, no ads.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- CTA Section -->
     <div class="px-6 py-20">
         <div class="mx-auto max-w-4xl">
-            <div class="bg-linear-to-r from-blue-500/10 to-purple-500/10 rounded-3xl p-12 text-center border border-zinc-800">
+            <div class="bg-linear-to-r from-teal-500/10 to-amber-500/10 rounded-3xl p-12 text-center border border-zinc-800">
                 <h2 class="text-4xl font-bold mb-4">Ready to get started?</h2>
                 <p class="text-xl text-zinc-400 mb-8">Join Hack Clubbers already using Shawty</p>
                 {#if !data?.user}

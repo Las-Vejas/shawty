@@ -19,6 +19,7 @@ export const actions = {
 
         const formData = await request.formData();
         let url = formData.get('url')?.toString();
+        let customSlug = formData.get('customSlug')?.toString()?.trim();
 
         if (!url) {
             return fail(400, { error: 'URL is required' });
@@ -36,8 +37,33 @@ export const actions = {
             return fail(400, { error: 'Invalid URL format' });
         }
 
-        // Generate short code (6 random characters)
-        const shortCode = Math.random().toString(36).substring(2, 8);
+        // Handle custom slug
+        let shortCode: string;
+        let isCustom = false;
+
+        if (customSlug) {
+            // Validate custom slug: alphanumeric and hyphens only, 3-20 chars
+            if (!/^[a-zA-Z0-9-]{3,20}$/.test(customSlug)) {
+                return fail(400, { error: 'Custom slug must be 3-20 characters (letters, numbers, hyphens only)' });
+            }
+
+            // Check if slug is already taken
+            const { data: existing } = await supabase
+                .from('links')
+                .select('id')
+                .eq('short_code', customSlug)
+                .single();
+
+            if (existing) {
+                return fail(400, { error: 'This custom slug is already taken' });
+            }
+
+            shortCode = customSlug;
+            isCustom = true;
+        } else {
+            // Generate random short code (6 random characters)
+            shortCode = Math.random().toString(36).substring(2, 8);
+        }
 
         // Insert into database
         const { error } = await supabase.from('links').insert({
@@ -46,10 +72,14 @@ export const actions = {
             user_id: locals.user.id,
             clicks: 0,
             on_leaderboard: false,
+            custom_slug: isCustom,
         });
 
         if (error) {
             console.error('Database error:', error);
+            if (error.code === '23505') { // Unique constraint violation
+                return fail(400, { error: 'This slug is already taken' });
+            }
             return fail(500, { error: 'Failed to create short link' });
         }
 
@@ -62,8 +92,6 @@ export const actions = {
         const formData = await request.formData();
         const linkId = formData.get('linkId')?.toString();
         let newUrl = formData.get('newUrl')?.toString();
-
-        console.log('Update request:', { linkId, newUrl }); // Debug log
 
         if (!linkId) {
             return fail(400, { error: 'Link ID is required' });
@@ -132,7 +160,6 @@ export const actions = {
             return fail(400, { error: 'Link ID is required' });
         }
 
-        // Delete the link (only if it belongs to the user)
         const { error } = await supabase
             .from('links')
             .delete()

@@ -13,6 +13,9 @@
     let editingId = $state<string | null>(null);
     let editUrl = $state<string>('');
     
+    // Show advanced options
+    let showAdvanced = $state<boolean>(false);
+    
     function toggleMenu(linkId: string) {
         openMenuId = openMenuId === linkId ? null : linkId;
     }
@@ -44,20 +47,61 @@
         <!-- Shorten Card -->
         <div class="bg-zinc-900 rounded-2xl shadow-lg p-6 space-y-4">
             <h2 class="text-xl font-semibold">Shorten a link</h2>
-            <form method="POST" action="?/create" class="flex gap-3">
-                <input
-                    name="url"
-                    placeholder="example.com or https://example.com"
-                    required
-                    class="flex-1 rounded-xl bg-zinc-800 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
-                />
-                <button class="px-6 py-3 rounded-xl bg-white text-zinc-900 font-medium hover:bg-zinc-200">
-                    Shorten
+            <form method="POST" action="?/create" class="space-y-4">
+                <div class="flex gap-3">
+                    <input
+                        name="url"
+                        placeholder="example.com or https://example.com"
+                        required
+                        class="flex-1 rounded-xl bg-zinc-800 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                    />
+                    <button type="submit" class="px-6 py-3 rounded-xl bg-white text-zinc-900 font-medium hover:bg-zinc-200">
+                        Shorten
+                    </button>
+                </div>
+                
+                <!-- Advanced Options Toggle -->
+                <button 
+                    type="button"
+                    onclick={() => showAdvanced = !showAdvanced}
+                    class="text-sm text-zinc-400 hover:text-white flex items-center gap-2"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform {showAdvanced ? 'rotate-180' : ''}">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                    {showAdvanced ? 'Hide' : 'Show'} advanced options
                 </button>
+                
+                {#if showAdvanced}
+                    <div class="space-y-3 pt-2">
+                        <div>
+                            <label for="customSlug" class="block text-sm font-medium mb-2 text-zinc-300">
+                                Custom Slug (optional)
+                            </label>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm text-zinc-400">vejas.site/</span>
+                                <input
+                                    id="customSlug"
+                                    name="customSlug"
+                                    type="text"
+                                    pattern="[a-zA-Z0-9-]{20}"
+                                    placeholder="my-custom-link"
+                                    class="flex-1 rounded-xl bg-zinc-800 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                />
+                            </div>
+                            <p class="text-xs text-zinc-500 mt-1">3-20 characters: letters, numbers, and hyphens only</p>
+                        </div>
+                    </div>
+                {/if}
+                
+                <p class="text-xs text-zinc-400">
+                    {#if showAdvanced}
+                        Leave custom slug empty for a random short link
+                    {:else}
+                        Your short link will look like: <span class="text-zinc-200">vejas.site/abc123</span>
+                    {/if}
+                </p>
             </form>
-            <p class="text-xs text-zinc-400">
-                Your short link will look like: <span class="text-zinc-200">vejas.site/abc123</span>
-            </p>
         </div>
 
         <!-- Success/Error Messages -->
@@ -94,6 +138,11 @@
                                     <a href="/{link.short_code}" class="text-sm font-medium text-blue-400 hover:underline">
                                         vejas.site/{link.short_code}
                                     </a>
+                                    {#if link.custom_slug}
+                                        <span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                                            ✨ Custom
+                                        </span>
+                                    {/if}
                                     {#if link.on_leaderboard}
                                         <span class="text-xs px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
                                             🏆 Public
