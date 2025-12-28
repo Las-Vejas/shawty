@@ -41,7 +41,6 @@
             </div>
 
             <!-- Stats -->
-            {#if data?.user}
                 <div class="pt-12 grid grid-cols-3 gap-8 max-w-2xl mx-auto">
                     <div class="space-y-1">
                         <p class="text-3xl font-bold text-white">∞</p>
@@ -56,7 +55,6 @@
                         <p class="text-sm text-zinc-400">Secure</p>
                     </div>
                 </div>
-            {/if}
         </div>
     </div>
 
