@@ -15,23 +15,23 @@
 <div class="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
 	
 	<nav class="sticky top-0 z-50 bg-zinc-900/95 backdrop-blur-sm border-b border-zinc-800">
-		<div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+		<div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
 			<a href="/" class="text-2xl font-bold tracking-tight hover:text-zinc-300 transition-colors">
 				shawty
 			</a>
 			<div class="flex items-center gap-4">
 				{#if data?.user}
-					<a href="/dashboard" class="px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-sm transition-colors">
+					<a href="/dashboard" class="px-4 py-2 rounded-lg bg-zinc-800 border border-transparent hover:border-zinc-600 hover:border hover:bg-zinc-700 text-sm transition-colors">
 						Dashboard
 					</a>
-					<a href="/leaderboard" class="px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-sm transition-colors">
+					<a href="/leaderboard" class="px-4 py-2 rounded-lg bg-zinc-800 border border-transparent hover:border-zinc-600 hover:border hover:bg-zinc-700 text-sm transition-colors">
 						Leaderboard
 					</a>
-					<a href="/auth/logout" class="px-4 py-2 rounded-lg bg-red-800/50 border-red-700 hover:border-red-600 hover:bg-red-700/50 text-sm transition-colors">
+					<a href="/auth/logout" class="px-4 py-2 rounded-lg bg-red-900 border border-transparent hover:border-red-600 hover:bg-red-700 text-sm transition-colors">
 						Logout
 					</a>
 				{:else}
-					<a href="/leaderboard" class="px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-sm transition-colors">
+					<a href="/leaderboard" class="px-4 py-2 rounded-lg bg-zinc-800 border border-transparent hover:border-zinc-600 hover:border hover:bg-zinc-700 text-sm transition-colors">
 						Leaderboard
 					</a>
 					<a href="/login" class="px-4 py-2 rounded-lg bg-white text-zinc-900 hover:bg-zinc-200 text-sm font-medium transition-colors">

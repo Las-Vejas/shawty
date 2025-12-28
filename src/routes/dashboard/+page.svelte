@@ -39,7 +39,19 @@
         editingId = null;
         editUrl = '';
     }
+    
+    // Close menu when clicking outside
+    function handleClickOutside(event: MouseEvent) {
+        if (openMenuId !== null) {
+            const target = event.target as HTMLElement;
+            if (!target.closest('.menu-container')) {
+                openMenuId = null;
+            }
+        }
+    }
 </script>
+
+<svelte:window onclick={handleClickOutside} />
 
 <div class="p-6">
     <div class="max-w-3xl mx-auto space-y-8">
@@ -181,7 +193,7 @@
                                 </button>
                                 
                                 <!-- Menu Button -->
-                                <div class="relative">
+                                <div class="relative menu-container">
                                     <button onclick={() => toggleMenu(link.id)} class="w-8 h-8 rounded-lg bg-zinc-700/50 hover:bg-zinc-700 flex items-center justify-center transition-colors" aria-label="More options">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                                             <circle cx="12" cy="5" r="2"></circle>
