@@ -8,12 +8,18 @@ export const handle: Handle = async ({ event, resolve }) => {
     // Fetch user from database
     const { data: user } = await supabase
       .from('users')
-      .select('id, email, name')
+      .select('id, email, name, first_name, last_name')
       .eq('id', sessionId)
       .single();
 
     if (user) {
-      event.locals.user = { id: user.id, email: user.email };
+      event.locals.user = { 
+        id: user.id, 
+        email: user.email, 
+        name: user.name,
+        first_name: user.first_name,
+        last_name: user.last_name
+      };
     }
   }
 

@@ -21,17 +21,20 @@
 			</a>
 			<div class="flex items-center gap-4">
 				{#if data?.user}
-					<a href="/dashboard" class="px-4 py-2 rounded-lg bg-zinc-800 border border-transparent hover:border-zinc-600 hover:border hover:bg-zinc-700 text-sm transition-colors">
+					<span class="text-sm text-zinc-400">
+						Hey, <span class="text-white font-medium">{data.user.first_name}</span>!
+					</span>
+					<a href="/dashboard" class="px-4 py-2 rounded-lg bg-zinc-800 border border-transparent hover:border-zinc-600 hover:bg-zinc-700 text-sm transition-colors">
 						Dashboard
 					</a>
-					<a href="/leaderboard" class="px-4 py-2 rounded-lg bg-zinc-800 border border-transparent hover:border-zinc-600 hover:border hover:bg-zinc-700 text-sm transition-colors">
+					<a href="/leaderboard" class="px-4 py-2 rounded-lg bg-zinc-800 border border-transparent hover:border-zinc-600 hover:bg-zinc-700 text-sm transition-colors">
 						Leaderboard
 					</a>
 					<a href="/auth/logout" class="px-4 py-2 rounded-lg bg-red-900 border border-transparent hover:border-red-600 hover:bg-red-700 text-sm transition-colors">
 						Logout
 					</a>
 				{:else}
-					<a href="/leaderboard" class="px-4 py-2 rounded-lg bg-zinc-800 border border-transparent hover:border-zinc-600 hover:border hover:bg-zinc-700 text-sm transition-colors">
+					<a href="/leaderboard" class="px-4 py-2 rounded-lg bg-zinc-800 border border-transparent hover:border-zinc-600 hover:bg-zinc-700 text-sm transition-colors">
 						Leaderboard
 					</a>
 					<a href="/login" class="px-4 py-2 rounded-lg bg-white text-zinc-900 hover:bg-zinc-200 text-sm font-medium transition-colors">

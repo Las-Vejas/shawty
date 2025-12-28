@@ -37,7 +37,7 @@ export const GET = async ({ url, cookies, locals }) => {
       throw new Error(`Failed to get access token: ${JSON.stringify(tokenData)}`);
     }
 
-    // Get user info from HackClub Auth API
+    // Get user info from HackClub Auth API (not OIDC endpoint)
     const userResponse = await fetch("https://auth.hackclub.com/api/v1/me", {
       headers: {
         Authorization: `Bearer ${tokenData.access_token}`,
@@ -50,6 +50,19 @@ export const GET = async ({ url, cookies, locals }) => {
       throw new Error(`Failed to get user info: ${JSON.stringify(userData)}`);
     }
 
+    // Debug: Log to both console and redirect with data
+    console.log('Hack Club user data:', JSON.stringify(userData, null, 2));
+    console.log('Identity fields:', Object.keys(userData.identity || {}));
+
+    // Extract first and last name from identity
+    const firstName = userData.identity.first_name || null;
+    const lastName = userData.identity.last_name || null;
+    
+    // Use email prefix as username
+    const userName = userData.identity.primary_email?.split('@')[0] || 'user';
+    
+    console.log('Extracted:', { userName, firstName, lastName });
+
     // Store or update user in database
     const { data: existingUser } = await supabase
       .from("users")
@@ -60,6 +73,17 @@ export const GET = async ({ url, cookies, locals }) => {
     let userId: string;
 
     if (existingUser) {
+      // Update existing user's data in case it changed
+      await supabase
+        .from("users")
+        .update({
+          name: userName,
+          email: userData.identity.primary_email,
+          first_name: firstName,
+          last_name: lastName,
+        })
+        .eq("id", existingUser.id);
+      
       userId = existingUser.id;
     } else {
       // Create new user
@@ -68,7 +92,9 @@ export const GET = async ({ url, cookies, locals }) => {
         .insert({
           slack_id: userData.identity.id,
           email: userData.identity.primary_email,
-          name: userData.identity.primary_email?.split('@')[0] || 'User',
+          name: userName,
+          first_name: firstName,
+          last_name: lastName,
         })
         .select("id")
         .single();
@@ -96,6 +122,7 @@ export const GET = async ({ url, cookies, locals }) => {
     if (error instanceof Response) {
       throw error;
     }
+    console.error('Auth callback error:', error);
     throw redirect(302, "/login?error=oauth_failed");
   }
 };
