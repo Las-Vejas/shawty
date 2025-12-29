@@ -59,7 +59,7 @@
     </div>
 
     <!-- Demo Section -->
-    <div class="px-6 py-20">
+    <div class="px-6 py-6">
         <div class="mx-auto max-w-4xl">
             <div class="bg-zinc-900 rounded-2xl shadow-2xl p-8 border border-zinc-800">
                 <div class="flex items-center gap-2 mb-6">
