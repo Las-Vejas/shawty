@@ -11,6 +11,13 @@
 
     let { data, form }: { data: PageData; form: ActionData } = $props();
     
+    // Link creation state
+    let isCreatingLink = $state(false);
+    let apiMessage = $state<{ type: 'success' | 'error'; text: string; shortCode?: string } | null>(null);
+    let urlInput = $state('');
+    let customSlugInput = $state('');
+    let passwordInput = $state('');
+    
     // Track which QR code is being shown
     let showQrId = $state<string | null>(null);
     
@@ -38,6 +45,58 @@
         editingId = null;
         editUrl = '';
     }
+
+    async function handleCreateLink() {
+        const url = urlInput.trim();
+        if (!url) {
+            apiMessage = { type: 'error', text: 'URL is required' };
+            return;
+        }
+
+        isCreatingLink = true;
+        apiMessage = null;
+
+        try {
+            const response = await fetch('/api/links', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    url,
+                    customSlug: customSlugInput || null,
+                    password: passwordInput || null
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.shortCode) {
+                apiMessage = { 
+                    type: 'success', 
+                    text: `Short link created!`,
+                    shortCode: result.shortCode
+                };
+                urlInput = '';
+                customSlugInput = '';
+                passwordInput = '';
+                showAdvanced = false;
+                // Refresh links from API
+                await new Promise(resolve => setTimeout(resolve, 500));
+                const linksResponse = await fetch('/api/links');
+                if (linksResponse.ok) {
+                    const linksData = await linksResponse.json();
+                    data.links = linksData.links;
+                    data.total = linksData.total;
+                }
+            } else {
+                apiMessage = { type: 'error', text: result.error || 'Failed to create link' };
+            }
+        } catch (error) {
+            console.error('Error creating link:', error);
+            apiMessage = { type: 'error', text: 'An error occurred while creating the link' };
+        } finally {
+            isCreatingLink = false;
+        }
+    }
 </script>
 
 <div class="p-6">
@@ -46,16 +105,17 @@
         <!-- Shorten Card -->
         <div class="dark:bg-zinc-900 rounded-2xl border-gray-300 dark:border-zinc-800 border shadow-sm p-6 space-y-4">
             <h2 class="text-xl font-semibold">Shorten a link</h2>
-            <form method="POST" action="?/create" class="space-y-4">
+            <div class="space-y-4">
                 <div class="flex gap-3">
                     <input
-                        name="url"
+                        bind:value={urlInput}
                         placeholder="example.com or https://example.com"
                         required
-                        class="flex-1 rounded-xl dark:bg-zinc-800 border-gray-300 dark:border-zinc-800 border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                        disabled={isCreatingLink}
+                        class="flex-1 rounded-xl dark:bg-zinc-800 border-gray-300 dark:border-zinc-800 border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-white/20 disabled:opacity-50"
                     />
-                    <Button type="submit" variant="default" class="px-6 rounded-xl font-medium h-12.5">
-                        Shorten
+                    <Button type="button" onclick={handleCreateLink} variant="default" class="px-6 rounded-xl font-medium h-12.5" disabled={isCreatingLink}>
+                        {isCreatingLink ? 'Creating...' : 'Shorten'}
                     </Button>
                 </div>
                 
@@ -63,7 +123,8 @@
                 <button 
                     type="button"
                     onclick={() => showAdvanced = !showAdvanced}
-                    class="text-sm text-zinc-700 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white flex items-center gap-2"
+                    disabled={isCreatingLink}
+                    class="text-sm text-zinc-700 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white flex items-center gap-2 disabled:opacity-50"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform {showAdvanced ? 'rotate-180' : ''}">
                         <polyline points="6 9 12 15 18 9"></polyline>
@@ -81,11 +142,12 @@
                                 <span class="text-sm dark:text-zinc-400">www.shawty.app/</span>
                                 <input
                                     id="customSlug"
-                                    name="customSlug"
+                                    bind:value={customSlugInput}
                                     type="text"
                                     pattern="[a-zA-Z0-9-]{20}"
                                     placeholder="my-custom-link"
-                                    class="flex-1 rounded-xl border border-gray-300 dark:bg-zinc-800 dark:border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                                    disabled={isCreatingLink}
+                                    class="flex-1 rounded-xl border border-gray-300 dark:bg-zinc-800 dark:border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-white/20 disabled:opacity-50"
                                 />  
                             </div>
                             <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">3-20 characters: letters, numbers, and hyphens only</p>
@@ -97,9 +159,10 @@
                             <input 
                                 id="password"
                                 type="password" 
-                                name="password" 
-                                placeholder="Leave empty for no password" 
-                                class="w-full rounded-xl border border-gray-300 dark:bg-zinc-800 dark:border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                                bind:value={passwordInput}
+                                placeholder="Leave empty for no password"
+                                disabled={isCreatingLink}
+                                class="w-full rounded-xl border border-gray-300 dark:bg-zinc-800 dark:border-zinc-800 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-white/20 disabled:opacity-50"
                             />
                             <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Visitors will need this password to access the link</p>
                         </div>
@@ -113,21 +176,21 @@
                         Your short link will look like: <span class="dark:text-zinc-200">www.shawty.app/abc123</span>
                     {/if}
                 </p>
-            </form>
+            </div>
         </div>
 
         <!-- Success/Error Messages -->
-        {#if form?.error}
+        {#if apiMessage?.type === 'error'}
             <div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400">
-                ❌ {form.error}
+                ❌ {apiMessage.text}
             </div>
         {/if}
 
-        {#if form?.success && form?.shortCode}
+        {#if apiMessage?.type === 'success' && apiMessage.shortCode}
             <div class="bg-emerald-500/30 border border-emerald-500/40 rounded-xl p-6 text-center">
-                <p class="text-lg text-emerald-600 dark:text-emerald-400 mb-3">✅ Short link created!</p>
-                <a href="/{form.shortCode}" class="text-xl font-medium hover:underline">
-                    {typeof window !== 'undefined' ? window.location.origin : 'https://www.shawty.app'}/{form.shortCode}
+                <p class="text-lg text-emerald-600 dark:text-emerald-400 mb-3">✅ {apiMessage.text}</p>
+                <a href="/{apiMessage.shortCode}" class="text-xl font-medium hover:underline">
+                    {typeof window !== 'undefined' ? window.location.origin : 'https://www.shawty.app'}/{apiMessage.shortCode}
                 </a>
             </div>
         {/if}
