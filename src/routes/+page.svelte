@@ -11,7 +11,6 @@
     import Lock from "@lucide/svelte/icons/lock"
     import Laptop from "@lucide/svelte/icons/laptop"
     import { onMount } from 'svelte';
-    import gsap from 'gsap';
 
     onMount(() => {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
@@ -165,7 +164,7 @@
                     
                     <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 text-center">
                         <p class="text-emerald-400 mb-2">✨ Shortened successfully!</p>
-                        <p class="text-2xl font-mono text-white">vejas.site/<span id="hacktext">hack</span></p>
+                        <p class="text-2xl font-mono text-white">www.shawty.app/<span id="hacktext">hack</span></p>
                     </div>
                 </div>
             </div>

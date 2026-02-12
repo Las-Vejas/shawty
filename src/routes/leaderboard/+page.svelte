@@ -42,7 +42,7 @@
                             <!-- Link Info -->
                             <div class="flex flex-col min-w-0 flex-1">
                                 <a href="/{link.short_code}" class="text-base font-medium text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">
-                                    vejas.site/{link.short_code}
+                                    www.shawty.app/{link.short_code}
                                 </a>
                                 <a href={link.long_url} target="_blank" rel="noopener noreferrer" class="text-sm text-zinc-400 truncate hover:text-zinc-300">
                                     {link.long_url}

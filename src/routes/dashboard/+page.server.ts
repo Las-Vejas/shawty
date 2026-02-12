@@ -13,9 +13,9 @@ const getHostname = (url: string): string | null => {
 };
 
 const BLOCKED_HOSTNAMES = [
-    getHostname(PUBLIC_URL), // e.g., vejas.site
-    'vejas.site',
-    'www.vejas.site',
+    getHostname(PUBLIC_URL), // e.g., www.shawty.app
+    'www.shawty.app',
+    'shawty.app',
 ].filter(Boolean) as string[];
 
 // Validate that URL doesn't point to our own domain (prevents loops)
@@ -104,16 +104,21 @@ const sendSlackAlert = async (user: any, attemptedUrl: string, action: 'create' 
     }
 };
 
-export const load = async ({ locals }) => {
+export const load = async ({ locals, url }) => {
     if (!locals.user) throw redirect(302, '/login');
 
-    const { data: links } = await supabase
-        .from('links')
-        .select('*')
-        .eq('user_id', locals.user.id)
-        .order('created_at', { ascending: false });
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const limit = 20;
+    const offset = (page - 1) * limit;
 
-    return { links };
+    const { data: links, count } = await supabase
+        .from('links')
+        .select('*', { count: 'exact' })
+        .eq('user_id', locals.user.id)
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1);
+
+    return { links, page, limit, total: count || 0 };
 };
 
 export const actions = {
@@ -142,8 +147,10 @@ export const actions = {
 
         // Prevent self-referencing links (loop protection)
         if (!validateUrlNotSelfReferencing(url)) {
-            // Send Slack alert
-            await sendSlackAlert(locals.user, url, 'create');
+            // Send Slack alert asynchronously (don't await to avoid blocking response)
+            sendSlackAlert(locals.user, url, 'create').catch(err =>
+                console.error('Failed to send Slack alert:', err)
+            );
             // Throw 404 error
             throw error(404, 'Cannot create shortlinks that point to this domain');
         }
@@ -227,8 +234,10 @@ export const actions = {
 
         // Prevent self-referencing links (loop protection)
         if (!validateUrlNotSelfReferencing(newUrl)) {
-            // Send Slack alert
-            await sendSlackAlert(locals.user, newUrl, 'update');
+            // Send Slack alert asynchronously (don't await to avoid blocking response)
+            sendSlackAlert(locals.user, newUrl, 'update').catch(err =>
+                console.error('Failed to send Slack alert:', err)
+            );
             // Throw 404 error
             throw error(404, 'Cannot update to a URL that points to this domain');
         }

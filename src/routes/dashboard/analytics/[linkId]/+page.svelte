@@ -33,7 +33,7 @@
                 <h1 class="text-3xl font-bold">Analytics</h1>
                 <div class="flex items-center gap-2 mt-2">
                     <a href="/{data.link.short_code}" class="text-lg text-blue-500 dark:text-blue-400 hover:underline">
-                        vejas.site/{data.link.short_code}
+                        www.shawty.app/{data.link.short_code}
                     </a>
                     <span class="text-zinc-500">→</span>
                     <a href={data.link.long_url} target="_blank" rel="noopener noreferrer" class="text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-300 truncate max-w-md">
