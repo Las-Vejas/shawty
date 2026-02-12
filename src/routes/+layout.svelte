@@ -14,9 +14,9 @@
     
     let { children, data } = $props();
 
-    const commitHash = __GIT_COMMIT_HASH__;
-    const repoUrl = __GITHUB_REPO_URL__;
-    const commitUrl = `github.com/commit/${commitHash}`;
+    const commitHash = __GIT_COMMIT_HASH__ || 'main';
+    const repoUrl = 'https://github.com/Las-Vejas/shawty';
+    const commitUrl = `${repoUrl}/commit/${commitHash}`;
 
     let currentEmoji = $state('❤️');
     const emojis = ['☕', '💻', '🚀', '🔥', '💡', '🎉', '✨'];
@@ -123,7 +123,7 @@
                     <h4 class="text-sm font-semibold mb-3">Connect</h4>
                     <ul class="space-y-2 text-sm">
                         <li><a href="https://hackclub.enterprise.slack.com/team/U0930DMR4BA" class="hover:text-zinc-400 transition-colors">@Vejas on Slack</a></li>
-                        <li><a href="https://shawty.app/a4eke8" class="hover:text-zinc-400 transition-colors">GitHub Repo</a></li>
+                        <li><a href={repoUrl} target="_blank" rel="noopener noreferrer" class="hover:text-zinc-400 transition-colors">GitHub Repo</a></li>
                     </ul>
                 </div>
             </div>
