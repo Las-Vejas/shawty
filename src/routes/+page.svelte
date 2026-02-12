@@ -10,6 +10,8 @@
     import Chart from "@lucide/svelte/icons/chart-no-axes-combined"
     import Lock from "@lucide/svelte/icons/lock"
     import Laptop from "@lucide/svelte/icons/laptop"
+    import Infinity from "@lucide/svelte/icons/infinity"
+    import Zap from "@lucide/svelte/icons/zap"
     import { onMount } from 'svelte';
     import gsap from 'gsap';
 
@@ -125,16 +127,17 @@
 
             <!-- Stats -->
                 <div class="pt-12 grid grid-cols-3 gap-8 max-w-2xl mx-auto">
-                    <div class="space-y-1">
-                        <p class="text-3xl font-bold">∞</p>
+                    <div class="flex flex-col space-y-4 items-center">
+
+                        <Infinity class=""/>
                         <p class="text-sm dark:text-zinc-400 text-zinc-700">Links Created</p>
                     </div>
-                    <div class="space-y-1">
-                        <p class="text-3xl font-bold">⚡</p>
+                    <div class="flex flex-col space-y-4 items-center">
+                        <Zap/>
                         <p class="text-sm dark:text-zinc-400 text-zinc-700">Lightning Fast</p>
                     </div>
-                    <div class="space-y-1">
-                        <p class="text-3xl font-bold">🔒</p>
+                    <div class="flex flex-col space-y-4 items-center">
+                        <Lock/>
                         <p id="securitytext" class="text-sm dark:text-zinc-400 text-zinc-700">Secure</p>
                     </div>
                 </div>

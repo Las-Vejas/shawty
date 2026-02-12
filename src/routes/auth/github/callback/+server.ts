@@ -107,6 +107,7 @@ export const GET = async ({ url, cookies, locals }) => {
       maxAge: 60 * 60 * 24 * 30
     });
 
+    console.log('Redirecting to dashboard...');
     throw redirect(302, '/dashboard');
   } catch (error) {
     if (error instanceof Response) throw error;
