@@ -2,15 +2,16 @@ import { supabase } from '$lib/supabase';
 import { fail, redirect } from '@sveltejs/kit';
 
 export const load = async ({ params }) => {
-  const { data: link } = await supabase
-    .from('links')
-    .select('short_code, password')
-    .eq('short_code', params.code)
-    .single();
+  // Temporarily commented out for UI testing
+  // const { data: link } = await supabase
+  //   .from('links')
+  //   .select('short_code, password')
+  //   .eq('short_code', params.code)
+  //   .single();
 
-  if (!link || !link.password) {
-    throw redirect(302, `/${params.code}`);
-  }
+  // if (!link || !link.password) {
+  //   throw redirect(302, `/${params.code}`);
+  // }
 
   return { code: params.code };
 };

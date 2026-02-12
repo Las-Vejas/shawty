@@ -1,8 +1,32 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
+  import { parseDuration } from '@internationalized/date';
   import type { ActionData } from './$types';
+  import gsap from 'gsap';
+  import { onMount } from 'svelte';
 
   let { form }: { form: ActionData } = $props();
+  
+  let headingRef: HTMLHeadingElement;
+  
+  onMount(() => {
+    const finalText = "Password Protected Link";
+const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890±!@#$%^&*()_+";
+    let frame = 0;
+    
+    const animate = () => {
+      headingRef.innerText = finalText
+        .split("")
+        .map((char, i) => (i < frame ? char : chars[Math.floor(Math.random() * chars.length)]))
+        .join("");
+      
+      frame += 1/3;
+      if (frame < finalText.length) requestAnimationFrame(animate);
+      else headingRef.innerText = finalText;
+    };
+    
+    animate();
+  });
 </script>
 
 <div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-zinc-950 px-4">
@@ -13,7 +37,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
         </svg>
       </div>
-      <h2 class="mt-6 text-3xl font-bold text-gray-900 dark:text-white">Password Protected Link</h2>
+      <h2 bind:this={headingRef} class="mt-6 text-3xl font-bold text-gray-900 dark:text-white">Password Protected Link</h2>
       <p class="mt-2 text-sm text-gray-600 dark:text-zinc-400">This link requires a password to access</p>
     </div>
 
