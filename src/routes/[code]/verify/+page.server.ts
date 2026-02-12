@@ -1,17 +1,17 @@
 import { supabase } from '$lib/supabase';
+import { comparePassword } from '$lib/password';
 import { fail, redirect } from '@sveltejs/kit';
 
 export const load = async ({ params }) => {
-  // Temporarily commented out for UI testing
-  // const { data: link } = await supabase
-  //   .from('links')
-  //   .select('short_code, password')
-  //   .eq('short_code', params.code)
-  //   .single();
+  const { data: link } = await supabase
+    .from('links')
+    .select('short_code, password')
+    .eq('short_code', params.code)
+    .single();
 
-  // if (!link || !link.password) {
-  //   throw redirect(302, `/${params.code}`);
-  // }
+  if (!link || !link.password) {
+    throw redirect(302, `/${params.code}`);
+  }
 
   return { code: params.code };
 };
@@ -35,8 +35,10 @@ export const actions = {
       return fail(404, { error: 'Link not found' });
     }
 
-    // Compare password
-    if (password === link.password) {
+    // Compare password using bcrypt
+    const passwordMatch = await comparePassword(password, link.password);
+    
+    if (passwordMatch) {
       // Set cookie to remember verification (expires in 1 hour)
       cookies.set(`verified_${params.code}`, 'true', {
         path: '/',

@@ -15,6 +15,31 @@ export default defineConfig({
     plugins: [sveltekit()],
     define: {
         __GIT_COMMIT_HASH__: JSON.stringify(getGitCommitHash()),
-        __GITHUB_REPO_URL__: JSON.stringify('https://github.com/las-vejas/shawty')
+        __GITHUB_REPO_URL__: JSON.stringify('shawty.app/a4eke8')
+    },
+    build: {
+        minify: 'terser',
+        rollupOptions: {
+            output: {
+                manualChunks(id) {
+                    // Vendor chunks for better caching
+                    if (id.includes('node_modules')) {
+                        if (id.includes('@supabase')) {
+                            return 'supabase';
+                        }
+                        if (id.includes('@vercel/analytics')) {
+                            return 'analytics';
+                        }
+                        if (id.includes('@lucide/svelte')) {
+                            return 'lucide';
+                        }
+                        if (id.includes('bits-ui')) {
+                            return 'bits-ui';
+                        }
+                        return 'vendor';
+                    }
+                }
+            }
+        }
     }
 });

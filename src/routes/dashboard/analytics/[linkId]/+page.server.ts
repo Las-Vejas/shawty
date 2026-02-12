@@ -1,15 +1,18 @@
 import { supabaseAdmin } from '$lib/supabaseAdmin';
 import { redirect, error } from '@sveltejs/kit';
 
-export const load = async ({ params, locals }) => {
+export const load = async ({ params, locals, url }) => {
 	if (!locals.user) throw redirect(302, '/login');
 
 	const linkId = params.linkId;
+	const page = parseInt(url.searchParams.get('page') || '1');
+	const limit = 100;
+	const offset = (page - 1) * limit;
 
-	// Verify the link belongs to the user (admin client, but enforce ownership)
+	// Verify the link belongs to the user (admin client, but enforce ownership) - optimized column selection
 	const { data: link, error: linkError } = await supabaseAdmin
 		.from('links')
-		.select('*')
+		.select('id,short_code,long_url,clicks,created_at')
 		.eq('id', linkId)
 		.eq('user_id', locals.user.id)
 		.single();
@@ -19,22 +22,23 @@ export const load = async ({ params, locals }) => {
 		throw error(404, 'Link not found');
 	}
 
-	// Get all clicks for this link (admin client; ownership enforced above)
-	const { data: clicks, error: clicksError } = await supabaseAdmin
+	// Get paginated clicks for this link (admin client; ownership enforced above) - optimized column selection
+	const { data: clicks, count, error: clicksError } = await supabaseAdmin
 		.from('link_clicks')
-		.select('*')
+		.select('country,device,os,browser,clicked_at,city,referrer', { count: 'exact' })
 		.eq('link_id', linkId)
-		.order('clicked_at', { ascending: false });
+		.order('clicked_at', { ascending: false })
+		.range(offset, offset + limit - 1);
 
 	if (clicksError) {
 		console.error('Clicks query error:', clicksError);
 	}
 
-	console.log(`Found ${clicks?.length || 0} clicks for link ${linkId}`);
+	console.log(`Found ${count || 0} total clicks for link ${linkId}`);
 
 	// Calculate analytics
 	const analytics = {
-		totalClicks: clicks?.length || 0,
+		totalClicks: count || 0,
 		byCountry: {} as Record<string, number>,
 		byDevice: {} as Record<string, number>,
 		byOS: {} as Record<string, number>,
@@ -64,5 +68,5 @@ export const load = async ({ params, locals }) => {
 		analytics.byDate[date] = (analytics.byDate[date] || 0) + 1;
 	});
 
-	return { link, clicks: clicks || [], analytics };
+	return { link, clicks: clicks || [], analytics, page, limit, total: count || 0 };
 };

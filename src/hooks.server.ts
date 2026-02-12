@@ -29,7 +29,8 @@ export const handle: Handle = async ({ event, resolve }) => {
         name: user.name,
         first_name: user.first_name,
         last_name: user.last_name,
-        slack_id: user.slack_id
+        slack_id: user.slack_id,
+        isAdmin: user.email === 'dev@localhost'
       };
     } else {
       console.log(`[HOOKS] No user found for session ID`);

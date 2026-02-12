@@ -1,236 +1,53 @@
 import { supabase } from '$lib/supabase';
 import { redirect, fail, error } from '@sveltejs/kit';
-import { PUBLIC_URL } from '$env/static/public';
-import { SLACK_WEBHOOK_URL } from '$env/static/private';
+import { validateUrlNotSelfReferencing, validateAndNormalizeUrl } from '$lib/urlValidation';
+import { sendSlackAlert } from '$lib/slack';
+import { fetchUserLinks } from '$lib/database';
 
-// Get the hostname from PUBLIC_URL to block self-referencing links
-const getHostname = (url: string): string | null => {
-    try {
-        return new URL(url).hostname.toLowerCase();
-    } catch {
-        return null;
-    }
-};
-
-const BLOCKED_HOSTNAMES = [
-    getHostname(PUBLIC_URL), // e.g., vejas.site
-    'vejas.site',
-    'www.vejas.site',
-].filter(Boolean) as string[];
-
-// Validate that URL doesn't point to our own domain (prevents loops)
-const validateUrlNotSelfReferencing = (url: string): boolean => {
-    const hostname = getHostname(url);
-    if (!hostname) return false;
-    
-    // Check if hostname matches any blocked hostname
-    return !BLOCKED_HOSTNAMES.some(blocked => 
-        hostname === blocked || hostname.endsWith(`.${blocked}`)
-    );
-};
-
-// Send Slack notification
-const sendSlackAlert = async (user: any, attemptedUrl: string, action: 'create' | 'update') => {
-    if (!SLACK_WEBHOOK_URL) {
-        console.warn('SLACK_WEBHOOK_URL not configured, skipping Slack notification');
-        return;
-    }
-
-    const displayName = user.first_name && user.last_name 
-        ? `${user.first_name} ${user.last_name}` 
-        : user.name || user.email;
-
-    const slackMention = user.slack_id ? `<@${user.slack_id}>` : displayName;
-
-    const message = {
-        text: `🚨 Loop Protection Alert`,
-        blocks: [
-            {
-                type: "header",
-                text: {
-                    type: "plain_text",
-                    text: "🚨 Attempted Self-Referencing Link",
-                    emoji: true
-                }
-            },
-            {
-                type: "section",
-                fields: [
-                    {
-                        type: "mrkdwn",
-                        text: `*User:*\n${slackMention}`
-                    },
-                    {
-                        type: "mrkdwn",
-                        text: `*Action:*\n${action === 'create' ? 'Create new link' : 'Update existing link'}`
-                    },
-                    {
-                        type: "mrkdwn",
-                        text: `*Email:*\n${user.email || 'N/A'}`
-                    },
-                    {
-                        type: "mrkdwn",
-                        text: `*Slack ID:*\n${user.slack_id || 'N/A'}`
-                    }
-                ]
-            },
-            {
-                type: "section",
-                text: {
-                    type: "mrkdwn",
-                    text: `*Attempted URL:*\n\`${attemptedUrl}\``
-                }
-            },
-            {
-                type: "context",
-                elements: [
-                    {
-                        type: "mrkdwn",
-                        text: `Blocked at ${new Date().toISOString()}`
-                    }
-                ]
-            }
-        ]
-    };
-
-    try {
-        await fetch(SLACK_WEBHOOK_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(message)
-        });
-    } catch (err) {
-        console.error('Failed to send Slack notification:', err);
-    }
-};
-
-export const load = async ({ locals }) => {
+export const load = async ({ locals, url }) => {
     if (!locals.user) throw redirect(302, '/login');
 
-    const { data: links } = await supabase
-        .from('links')
-        .select('*')
-        .eq('user_id', locals.user.id)
-        .order('created_at', { ascending: false });
-
-    return { links };
+    const page = parseInt(url.searchParams.get('page') || '1');
+    // Clamp page to valid range
+    const validPage = Math.max(1, page);
+    
+    const result = await fetchUserLinks({ userId: locals.user.id, page: validPage, limit: 20 });
+    
+    return {
+        ...result,
+        // Cache hints for browser
+        cache: {
+            maxAge: 60  // Cache for 1 minute
+        }
+    };
 };
 
+
 export const actions = {
-    create: async ({ request, locals }) => {
-        if (!locals.user) throw redirect(302, '/login');
-
-        const formData = await request.formData();
-        let url = formData.get('url')?.toString();
-        let customSlug = formData.get('customSlug')?.toString()?.trim();
-
-        if (!url) {
-            return fail(400, { error: 'URL is required' });
-        }
-
-        // Add https:// if no protocol is specified
-        if (!url.match(/^https?:\/\//i)) {
-            url = 'https://' + url;
-        }
-
-        // Validate URL format
-        try {
-            new URL(url);
-        } catch {
-            return fail(400, { error: 'Invalid URL format' });
-        }
-
-        // Prevent self-referencing links (loop protection)
-        if (!validateUrlNotSelfReferencing(url)) {
-            // Send Slack alert
-            await sendSlackAlert(locals.user, url, 'create');
-            // Throw 404 error
-            throw error(404, 'Cannot create shortlinks that point to this domain');
-        }
-
-        // Handle custom slug
-        let shortCode: string;
-        let isCustom = false;
-
-        if (customSlug) {
-            // Validate custom slug: alphanumeric and hyphens only, 3-20 chars
-            if (!/^[a-zA-Z0-9-]{3,20}$/.test(customSlug)) {
-                return fail(400, { error: 'Custom slug must be 3-20 characters (letters, numbers, hyphens only)' });
-            }
-
-            // Check if slug is already taken
-            const { data: existing } = await supabase
-                .from('links')
-                .select('id')
-                .eq('short_code', customSlug)
-                .single();
-
-            if (existing) {
-                return fail(400, { error: 'This custom slug is already taken' });
-            }
-
-            shortCode = customSlug;
-            isCustom = true;
-        } else {
-            // Generate random short code (6 random characters)
-            shortCode = Math.random().toString(36).substring(2, 8);
-        }
-
-        const password = formData.get('password')?.toString() || null;
-
-        // Insert into database
-        const { error: dbError } = await supabase.from('links').insert({
-            short_code: shortCode,
-            long_url: url,
-            user_id: locals.user.id,
-            clicks: 0,
-            on_leaderboard: false,
-            custom_slug: isCustom,
-            password: password // Add this field
-        });
-
-        if (dbError) {
-            console.error('Database error:', dbError);
-            if (dbError.code === '23505') { // Unique constraint violation
-                return fail(400, { error: 'This slug is already taken' });
-            }
-            return fail(500, { error: 'Failed to create short link' });
-        }
-
-        return { success: true, shortCode };
-    },
-
     update: async ({ request, locals }) => {
         if (!locals.user) throw redirect(302, '/login');
 
         const formData = await request.formData();
         const linkId = formData.get('linkId')?.toString();
-        let newUrl = formData.get('newUrl')?.toString();
+        const urlInput = formData.get('newUrl')?.toString();
 
         if (!linkId) {
             return fail(400, { error: 'Link ID is required' });
         }
 
-        if (!newUrl || newUrl.trim() === '') {
+        if (!urlInput || urlInput.trim() === '') {
             return fail(400, { error: 'URL cannot be empty' });
         }
 
-        if (!newUrl.match(/^https?:\/\//i)) {
-            newUrl = 'https://' + newUrl;
+        const urlValidation = validateAndNormalizeUrl(urlInput);
+        if (!urlValidation.valid) {
+            return fail(400, { error: urlValidation.error });
         }
 
-        try {
-            new URL(newUrl);
-        } catch {
-            return fail(400, { error: 'Invalid URL format' });
-        }
-
-        // Prevent self-referencing links (loop protection)
+        const newUrl = urlValidation.normalizedUrl!;
+        
         if (!validateUrlNotSelfReferencing(newUrl)) {
-            // Send Slack alert
-            await sendSlackAlert(locals.user, newUrl, 'update');
-            // Throw 404 error
-            throw error(404, 'Cannot update to a URL that points to this domain');
+            throw error(400, 'Cannot update to a URL that points to this domain');
         }
 
         const { error: dbError } = await supabase
