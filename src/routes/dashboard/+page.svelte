@@ -68,11 +68,23 @@
         deleteModal = null;
     }
     
-    function confirmDelete() {
+    async function confirmDelete() {
         if (deleteModal) {
-            const form = document.querySelector(`form[data-delete-link-id="${deleteModal.linkId}"]`) as HTMLFormElement;
-            if (form) {
-                form.requestSubmit();
+            try {
+                const response = await fetch('?/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ linkId: deleteModal.linkId }).toString()
+                });
+                
+                if (response.ok) {
+                    await invalidateAll();
+                } else {
+                    apiMessage = { type: 'error', text: 'Failed to delete link' };
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+                apiMessage = { type: 'error', text: 'An error occurred while deleting' };
             }
             closeDeleteModal();
         }
@@ -329,6 +341,11 @@
                   <span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
                     ✨ Custom
                   </span>
+                {/if}
+                {#if link.on_leaderboard}
+                    <span class="text-xs px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
+                        🏆 On leaderboard
+                    </span>
                 {/if}
               </div>
               
