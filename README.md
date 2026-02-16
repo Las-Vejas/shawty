@@ -75,26 +75,18 @@ Visit `http://localhost:5173` 🚀
 
 ## Features
 
-- 🔐 HackClub Slack OAuth authentication
-- 🔗 Create and manage short links
-- 📊 Track click counts
-- 👤 User-specific dashboard
-- ⚡ Built with SvelteKit + Supabase
+- HackClub Slack OAuth authentication
+- Github OAuth authentication
+- Create and manage short links
+- Track click counts and other analytics
+- Built with SvelteKit, shadcn-svelte, tailwindcss and Supabase
 
 ## How It Works
 
-1. Users authenticate with HackClub Slack
+1. Users authenticate with HackClub Auth or Github OAuth
 2. Create short links in the dashboard
-3. Share links like `yourdomain.com/abc123`
+3. Share links like `shawty.app/abc123`
 4. Automatic click tracking
 
 ## Deployment
-
-Before deploying:
-
-1. Update OAuth redirect URLs in HackClub app settings
-2. Update `redirect_uri` in:
-   - [src/routes/auth/login/+server.ts](src/routes/auth/login/+server.ts)
-   - [src/routes/auth/callback/+server.ts](src/routes/auth/callback/+server.ts)
-3. Set environment variables on your hosting platform
-4. Generate a strong `SESSION_SECRET`
+Shawty is deployed on Vercel.
